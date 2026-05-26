@@ -9,7 +9,7 @@ SSH_PORT=${SSH_PORT:-20022}
 AGENT_PORT=${AGENT_PORT:-15034}
 
 HOST_PROJECT_DIR=${HOST_PROJECT_DIR:-"$HOME/Linux-Monitoring/UbuntuVM"}
-AGENT_HOME=/home/agent-admin/agent-app
+AGENT_HOME=/home/agent-admin/agent-app-leak
 AGENT_ADMIN_PASSWORD=${AGENT_ADMIN_PASSWORD:-1234}
 
 
@@ -64,8 +64,8 @@ else
 fi
 
 mkdir -p '$AGENT_HOME'/{app,bin,api_keys,upload_files}
-mkdir -p /var/log/agent-app
-mkdir -p /var/log/monitor/agent-app/archive
+mkdir -p /var/log/agent-app-leak
+mkdir -p /var/log/monitor/agent-app-leak/archive
 
 chown agent-admin:agent-core /home/agent-admin
 chmod 750 /home/agent-admin
@@ -79,26 +79,26 @@ chmod 770 '$AGENT_HOME/upload_files'
 chown -R agent-admin:agent-core '$AGENT_HOME/api_keys'
 chmod 770 '$AGENT_HOME/api_keys'
 
-chown -R agent-admin:agent-core /var/log/agent-app
-chmod 770 /var/log/agent-app
+chown -R agent-admin:agent-core /var/log/agent-app-leak
+chmod 770 /var/log/agent-app-leak
 
 chown -R agent-admin:agent-common /var/log/monitor
 chmod -R 770 /var/log/monitor
 "
 
 orb -m "$VM_NAME" sudo bash -lc "
-tee /etc/profile.d/agent-app.sh >/dev/null <<EOF
+tee /etc/profile.d/agent-app-leak.sh >/dev/null <<EOF
 export AGENT_HOME=$AGENT_HOME
 export AGENT_PORT=$AGENT_PORT
 export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
 export AGENT_KEY_PATH=$AGENT_HOME/api_keys/t_secret.key
-export AGENT_LOG_DIR=/var/log/agent-app
-export MEMORY_LIMIT=256
-export CPU_MAX_OCCUPY=40
+export AGENT_LOG_DIR=/var/log/agent-app-leak
+export MEMORY_LIMIT=512
+export CPU_MAX_OCCUPY=100
 export MULTI_THREAD_ENABLE=false
 EOF
 
-chmod 644 /etc/profile.d/agent-app.sh
+chmod 644 /etc/profile.d/agent-app-leak.sh
 "
 
 orb -m "$VM_NAME" sudo bash -lc "
@@ -115,8 +115,8 @@ ufw allow '${SSH_PORT}/tcp' || true
 ufw allow '${AGENT_PORT}/tcp' || true
 ufw --force enable || true
 
-cat > /etc/logrotate.d/agent-app <<EOF
-/var/log/agent-app/monitor.log {
+cat > /etc/logrotate.d/agent-app-leak <<EOF
+/var/log/agent-app-leak/monitor.log {
     size 10M
     rotate 10
     compress
@@ -126,7 +126,7 @@ cat > /etc/logrotate.d/agent-app <<EOF
 }
 EOF
 
-chmod 644 /etc/logrotate.d/agent-app
+chmod 644 /etc/logrotate.d/agent-app-leak
 
 systemctl enable cron || true
 systemctl restart cron || true
@@ -140,8 +140,8 @@ ssh-keygen -R "[$VM_IP]:$SSH_PORT" >/dev/null 2>&1 || true
 
 echo "[INFO] Copying files by scp..."
 
-scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app" \
-  agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app"
+scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app-leak" \
+  agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app-leak"
 
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app-leak" \
   agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app-leak"
@@ -161,7 +161,7 @@ scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/setup_agent-admin.sh" \
 echo "[INFO] Fixing permissions after scp..."
 
 orb -m "$VM_NAME" sudo bash -lc "
-chmod +x '$AGENT_HOME/app/agent-app'
+chmod +x '$AGENT_HOME/app/agent-app-leak'
 chmod +x '$AGENT_HOME/bin/'*.sh
 chown -R agent-admin:agent-core '$AGENT_HOME/app' '$AGENT_HOME/bin'
 "
@@ -176,7 +176,7 @@ Next command:
 
 Then run:
 
-  cd ~/agent-app/bin
+  cd ~/agent-app-leak/bin
   ./setup_agent-admin.sh
 
 MSG
