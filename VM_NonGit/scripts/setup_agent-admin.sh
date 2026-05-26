@@ -6,7 +6,7 @@
 # This script must be run as agent-admin.
 # It performs:
 # - cron registration
-# - agent-app execution
+# - agent-app-leak execution
 
 set -euo pipefail
 
@@ -19,13 +19,13 @@ fi
 # Load Environment Variables
 # =========================
 
-source /etc/profile.d/agent-app.sh
+source /etc/profile.d/agent-app-leak.sh
 
 # =========================
 # Permission Setup
 # =========================
 
-chmod +x "$AGENT_HOME/app/agent-app"
+chmod +x "$AGENT_HOME/app/agent-app-leak"
 chmod +x "$AGENT_HOME/bin/"*.sh
 
 # =========================
@@ -54,23 +54,23 @@ chmod 664 /tmp/agent_app.log
 
 (
   crontab -l 2>/dev/null | grep -v monitor.sh || true
-  echo "* * * * * . /etc/profile.d/agent-app.sh; $AGENT_HOME/bin/monitor.sh >> /var/log/agent-app/cron.log 2>&1"
+  echo "* * * * * . /etc/profile.d/agent-app-leak.sh; $AGENT_HOME/bin/monitor.sh >> /var/log/agent-app-leak/cron.log 2>&1"
 ) | crontab -
 
 (
   crontab -l 2>/dev/null | grep -v log_archive.sh || true
-  echo "0 3 * * * . /etc/profile.d/agent-app.sh; $AGENT_HOME/bin/log_archive.sh >> /var/log/agent-app/archive.log 2>&1"
+  echo "0 3 * * * . /etc/profile.d/agent-app-leak.sh; $AGENT_HOME/bin/log_archive.sh >> /var/log/agent-app-leak/archive.log 2>&1"
 ) | crontab -
 
 # =========================
-# Start agent-app
+# Start agent-app-leak
 # =========================
 
-if ! pgrep -f "$AGENT_HOME/app/agent-app" >/dev/null 2>&1; then
+if ! pgrep -f "$AGENT_HOME/app/agent-app-leak" >/dev/null 2>&1; then
 
   cd "$AGENT_HOME/app"
 
-  nohup ./agent-app >> /tmp/agent_app.log 2>&1 < /dev/null &
+  nohup ./agent-app-leak >> "$AGENT_LOG_DIR/agent_app.log" 2>&1 < /dev/null &
 
 fi
 
@@ -84,7 +84,7 @@ setup_agent-admin.sh completed.
 
 Check process:
 
-  ps -ef | grep agent-app
+  ps -ef | grep agent-app-leak
 
 Check monitor:
 

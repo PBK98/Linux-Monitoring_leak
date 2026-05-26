@@ -12,6 +12,7 @@ HOST_PROJECT_DIR=${HOST_PROJECT_DIR:-"$HOME/Linux-Monitoring/UbuntuVM"}
 AGENT_HOME=/home/agent-admin/agent-app
 AGENT_ADMIN_PASSWORD=${AGENT_ADMIN_PASSWORD:-1234}
 
+
 if ! command -v orb >/dev/null 2>&1; then
   echo "[ERROR] orb command not found."
   exit 1
@@ -92,6 +93,9 @@ export AGENT_PORT=$AGENT_PORT
 export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
 export AGENT_KEY_PATH=$AGENT_HOME/api_keys/t_secret.key
 export AGENT_LOG_DIR=/var/log/agent-app
+export MEMORY_LIMIT=256
+export CPU_MAX_OCCUPY=40
+export MULTI_THREAD_ENABLE=false
 EOF
 
 chmod 644 /etc/profile.d/agent-app.sh
@@ -138,6 +142,9 @@ echo "[INFO] Copying files by scp..."
 
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app" \
   agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app"
+
+scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app-leak" \
+  agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app-leak"
 
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/monitor.sh" \
   agent-admin@"$VM_IP":"$AGENT_HOME/bin/monitor.sh"
