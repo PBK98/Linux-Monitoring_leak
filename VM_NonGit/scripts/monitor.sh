@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
-LOG_FILE="/var/log/agent-app/monitor.log"
-APP_NAME="agent-app"
+LOG_FILE="/var/log/agent-app-leak/monitor.log"
+APP_NAME="agent-app-leak"
 APP_PORT="15034"
 CPU_THRESHOLD=20
 MEM_THRESHOLD=10
