@@ -32,9 +32,9 @@ chmod +x "$AGENT_HOME/bin/"*.sh
 # API Key Setup
 # =========================
 
-echo 'agent_api_key_test' > "$AGENT_HOME/api_keys/t_secret.key"
+echo 'agent_api_key_test' > "$AGENT_HOME/api_keys/secret.key"
 
-chmod 660 "$AGENT_HOME/api_keys/t_secret.key"
+chmod 660 "$AGENT_HOME/api_keys/secret.key"
 
 # =========================
 # Runtime Log Setup
