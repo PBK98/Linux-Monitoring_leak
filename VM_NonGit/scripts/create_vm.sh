@@ -91,7 +91,7 @@ tee /etc/profile.d/agent-app-leak.sh >/dev/null <<EOF
 export AGENT_HOME=$AGENT_HOME
 export AGENT_PORT=$AGENT_PORT
 export AGENT_UPLOAD_DIR=$AGENT_HOME/upload_files
-export AGENT_KEY_PATH=$AGENT_HOME/api_keys/t_secret.key
+export AGENT_KEY_PATH=$AGENT_HOME/api_keys/secret.key
 export AGENT_LOG_DIR=/var/log/agent-app-leak
 export MEMORY_LIMIT=512
 export CPU_MAX_OCCUPY=100
