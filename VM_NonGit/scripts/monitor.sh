@@ -85,7 +85,7 @@ awk "BEGIN{exit !(CPU > CPU_THRESHOLD)}" && echo "[WARNING] ProcessCPU threshold
 awk "BEGIN{exit !($PRO_MEM > $MEM_THRESHOLD)}" && echo "[WARNING] Process MEM threshold exceeded (${PRO_MEM}% > ${MEM_THRESHOLD}%)"
 
 # System threshold warning
-awk "BEGIN{exit !($SYSCPU > $SYSCPU_THRESHOLD)}" && echo "[WARNING] SystemCPU threshold exceeded (${SYSCPU}% > ${SYSCPU_THRESHOLD}%)"
+awk "BEGIN{exit !($SYSCPU > $SYS_CPU_THRESHOLD)}" && echo "[WARNING] SystemCPU threshold exceeded (${SYSCPU}% > ${SYS_CPU_THRESHOLD}%)"
 awk "BEGIN{exit !($SYS_MEM > $SYS_MEM_THRESHOLD)}" && echo "[WARNING] System MEM threshold exceeded (${SYS_MEM}% > ${SYS_MEM_THRESHOLD}%)"
 
 # Disk threshold warning
