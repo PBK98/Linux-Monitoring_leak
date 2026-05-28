@@ -143,6 +143,16 @@ systemctl enable cron || true
 systemctl restart cron || true
 "
 
+# agent-admin 에게 ufw 사용 권한 부여(sudo)
+orb -m "$VM_NAME" sudo bash -lc "
+cat > /etc/sudoers.d/agent-admin-ufw <<'EOF'
+agent-admin ALL=(root) NOPASSWD: /usr/sbin/ufw status, /usr/sbin/ufw status verbose, /usr/sbin/ufw status numbered
+EOF
+
+chmod 440 /etc/sudoers.d/agent-admin-ufw
+visudo -cf /etc/sudoers.d/agent-admin-ufw
+"
+
 # IP 파싱
 VM_IP="$(orb -m "$VM_NAME" hostname -I | awk '{print $1}')"
 
