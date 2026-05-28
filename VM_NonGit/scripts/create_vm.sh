@@ -95,7 +95,13 @@ export AGENT_KEY_PATH=$AGENT_HOME/api_keys
 export AGENT_LOG_DIR=/var/log/agent-app-leak
 export MEMORY_LIMIT=256
 export CPU_MAX_OCCUPY=50
-export MULTI_THREAD_ENABLE=false
+export MULTI_THREAD_ENABLE=True
+export LOG_FILE=/var/log/agent-app-leak/monitor.log
+export APP_NAME="agent-app-leak"
+export APP_PORT="15034"
+export CPU_THRESHOLD=20
+export MEM_THRESHOLD=10
+export DISK_THRESHOLD=80
 EOF
 
 chown -R agent-admin:agent-common /etc/profile.d/agent-app-leak.sh

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -u
-LOG_FILE="/var/log/agent-app/monitor.log"
 
 echo
 echo "====== STATISTICS REPORT ======"
