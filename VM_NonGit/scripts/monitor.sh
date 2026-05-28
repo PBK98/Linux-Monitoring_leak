@@ -3,7 +3,9 @@ set -u
 
 ts() { date '+%Y-%m-%d %H:%M:%S'; }
 
-PID=$(pgrep -f "${APP_NAME}" | head -n 1 || true)
+# 포트번호가 APP_PORT(15034)인 프로세스 APP_NAME(agent-app-leak)의 PID 찾기
+PID=$(ss -lntp | grep ":${APP_PORT}" | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)
+
 echo "====== SYSTEM MONITOR RESULT ======"
 echo
 echo "[HEALTH CHECK]"

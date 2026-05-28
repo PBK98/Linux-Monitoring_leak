@@ -3,7 +3,21 @@ set -u
 
 ts() { date '+%Y-%m-%d %H:%M:%S'; }
 
-PID=$(pgrep -f "${APP_NAME}" | head -n 1 || true)
+# PID=$(pgrep -f "${APP_NAME}" | head -n 1 || true)
+
+PID=$(ss -lntp | grep ":${APP_PORT}" | sed -n 's/.*pid=\([0-9]*\).*/\1/p' | head -n 1)
+
+if [ -n "$PID" ]; then
+  echo "Checking process '${APP_NAME}'... [OK] (PID: $PID)"
+  CPU=$(ps -p "$PID" -o %cpu= | awk '
+    $1 ~ /^[0-9]+(\.[0-9]+)?$/ { print $1; exit }
+    { print "0.00"; exit }
+  ')
+else
+  echo "Checking process '${APP_NAME}'... [ERROR]"
+  CPU="0.00"
+fi
+
 echo "====== SYSTEM MONITOR RESULT ======"
 echo
 echo "[HEALTH CHECK]"
