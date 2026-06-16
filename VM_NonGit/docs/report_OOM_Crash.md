@@ -26,6 +26,126 @@ export MEMORY_LIMIT=256
 
 ## 2. Evidence & Logs (증거 자료)
 
+### agent-app-leak 실행 화면
+```bash
+[6/6] Verifying Mission Environment       [OK]
+   ... MEMORY_LIMIT=256MB, CPU_MAX_OCCUPY=90%, MULTI_THREAD_ENABLE=False
+------------------------------------------------------------
+All Boot Checks Passed!
+Agent READY
+2026-06-16 17:49:46,375 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-06-16 17:49:46,375 [INFO] Agent listening at port 15034
+
+==================================================
+ [ Agent Initiate ] Resource Check
+==================================================
+ [ MEMORY ] Limit: 256MB 		[ WARNING: Recommend Over 256MB ]
+ [ CPU    ] Limit: 90%  		[ WARNING: Recommend Under 50% ]
+ [ THREAD ] Concurrency: False 		[ OK ]
+--------------------------------------------------
+ >>> SYSTEM STATUS: STABLE. STARTING WORKLOAD MONITORING...
+==================================================
+
+2026-06-16 17:49:48,405 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-06-16 17:49:51,438 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-06-16 17:49:54,472 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-06-16 17:49:57,508 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-06-16 17:50:00,543 [INFO] [MemoryWorker] Current Heap: 125MB
+2026-06-16 17:50:03,576 [INFO] [MemoryWorker] Current Heap: 150MB
+2026-06-16 17:50:06,608 [INFO] [MemoryWorker] Current Heap: 175MB
+2026-06-16 17:50:09,644 [INFO] [MemoryWorker] Current Heap: 200MB
+2026-06-16 17:50:12,674 [INFO] [MemoryWorker] Current Heap: 225MB
+2026-06-16 17:50:15,700 [INFO] [MemoryWorker] Current Heap: 250MB
+2026-06-16 17:50:18,732 [INFO] [MemoryWorker] Current Heap: 275MB
+2026-06-16 17:50:18,732 [CRITICAL] [MemoryGuard] Memory limit exceeded (275MB >= 256MB) / (Recommend Over 256MB)
+2026-06-16 17:50:18,732 [CRITICAL] [MemoryGuard] Self-terminating process 4864 to prevent system instability.
+
+
+>>> [SYSTEM] SELF-TERMINATED (Memory Limit Exceeded) <<<
+
+Killed
+```
+
+### MEMORY_LIMIT 512MB로 증가 후
+
+```bash
+[6/6] Verifying Mission Environment       [OK]
+   ... MEMORY_LIMIT=512MB, CPU_MAX_OCCUPY=40%, MULTI_THREAD_ENABLE=False
+------------------------------------------------------------
+All Boot Checks Passed!
+Agent READY
+2026-06-16 17:50:43,352 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-06-16 17:50:43,352 [INFO] Agent listening at port 15034
+
+==================================================
+ [ Agent Initiate ] Resource Check
+==================================================
+ [ MEMORY ] Limit: 512MB 		[ OK ]
+ [ CPU    ] Limit: 40%  		[ OK ]
+ [ THREAD ] Concurrency: False 		[ OK ]
+--------------------------------------------------
+ >>> SYSTEM STATUS: STABLE. STARTING WORKLOAD MONITORING...
+==================================================
+
+2026-06-16 17:50:45,367 [INFO] >>> Scenario Selected: [Healthy System Monitoring]
+
+>>> [SYSTEM] ALL CONFIGURATIONS OPTIMAL. RUNNING STABILITY TEST... <<<
+
+2026-06-16 17:50:45,368 [INFO] [Scheduler] Task Scheduler Initialized.
+2026-06-16 17:50:45,368 [INFO] [Scheduler] Registered Tasks: ['Thread-A', 'Thread-B', 'Thread-C']
+2026-06-16 17:50:45,368 [INFO] [Scheduler] Starting task execution...
+2026-06-16 17:50:45,368 [INFO] [Thread-A] Task Started. Calculating... (20%)
+2026-06-16 17:50:45,424 [INFO] [Thread-A] Calculating... (40%)
+2026-06-16 17:50:45,476 [INFO] [Thread-A] Preempted. Progress saved at (40%)
+2026-06-16 17:50:45,529 [INFO] [Thread-B] Task Started. Calculating... (20%)
+2026-06-16 17:50:45,585 [INFO] [Thread-B] Calculating... (40%)
+2026-06-16 17:50:45,641 [INFO] [Thread-B] Preempted. Progress saved at (40%)
+2026-06-16 17:50:45,697 [INFO] [Thread-C] Task Started. Calculating... (20%)
+2026-06-16 17:50:45,753 [INFO] [Thread-C] Calculating... (40%)
+2026-06-16 17:50:45,809 [INFO] [Thread-C] Preempted. Progress saved at (40%)
+2026-06-16 17:50:45,865 [INFO] [Thread-A] Resumed. Calculating... (60%)
+2026-06-16 17:50:45,921 [INFO] [Thread-A] Calculating... (80%)
+2026-06-16 17:50:45,975 [INFO] [Thread-A] Preempted. Progress saved at (80%)
+2026-06-16 17:50:46,032 [INFO] [Thread-B] Resumed. Calculating... (60%)
+2026-06-16 17:50:46,088 [INFO] [Thread-B] Calculating... (80%)
+2026-06-16 17:50:46,143 [INFO] [Thread-B] Preempted. Progress saved at (80%)
+2026-06-16 17:50:46,199 [INFO] [Thread-C] Resumed. Calculating... (60%)
+2026-06-16 17:50:46,255 [INFO] [Thread-C] Calculating... (80%)
+2026-06-16 17:50:46,311 [INFO] [Thread-C] Preempted. Progress saved at (80%)
+2026-06-16 17:50:46,367 [INFO] [Thread-A] Resumed. Calculating... (100%)
+2026-06-16 17:50:46,423 [INFO] [Thread-B] Resumed. Calculating... (100%)
+2026-06-16 17:50:46,475 [INFO] [Thread-C] Resumed. Calculating... (100%)
+2026-06-16 17:50:46,531 [INFO] [Scheduler] All tasks completed.
+2026-06-16 17:50:46,547 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-06-16 17:50:46,547 [INFO] [CpuWorker] Started. Maximum CPU Limit: 40%
+2026-06-16 17:50:46,547 [INFO] [CpuWorker] Current Load: 5.00%
+2026-06-16 17:50:49,583 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-06-16 17:50:49,674 [INFO] [CpuWorker] Current Load: 6.28%
+2026-06-16 17:50:52,616 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-06-16 17:50:52,805 [INFO] [CpuWorker] Current Load: 13.48%
+2026-06-16 17:50:55,645 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-06-16 17:50:55,935 [INFO] [CpuWorker] Current Load: 14.41%
+2026-06-16 17:50:58,681 [INFO] [MemoryWorker] Current Heap: 125MB
+2026-06-16 17:50:59,067 [INFO] [CpuWorker] Current Load: 15.41%
+2026-06-16 17:51:01,714 [INFO] [MemoryWorker] Current Heap: 150MB
+2026-06-16 17:51:02,196 [INFO] [CpuWorker] Current Load: 22.68%
+2026-06-16 17:51:04,744 [INFO] [MemoryWorker] Current Heap: 175MB
+2026-06-16 17:51:05,312 [INFO] [CpuWorker] Current Load: 30.83%
+2026-06-16 17:51:07,429 [INFO] [CpuWorker] Peak reached (40.00%). Starting cooldown...
+2026-06-16 17:51:07,779 [INFO] [MemoryWorker] Current Heap: 200MB
+2026-06-16 17:51:08,437 [INFO] [CpuWorker] Current Load: 40.00%
+2026-06-16 17:51:10,808 [INFO] [MemoryWorker] Current Heap: 225MB
+2026-06-16 17:51:11,566 [INFO] [CpuWorker] Current Load: 38.16%
+2026-06-16 17:51:13,839 [INFO] [MemoryWorker] Current Heap: 250MB
+2026-06-16 17:51:14,689 [INFO] [CpuWorker] Current Load: 29.40%
+2026-06-16 17:51:16,870 [INFO] [MemoryWorker] Current Heap: 275MB
+2026-06-16 17:51:17,816 [INFO] [CpuWorker] Current Load: 23.81%
+2026-06-16 17:51:19,903 [INFO] [MemoryWorker] Current Heap: 300MB
+
+...
+```
+
+
 ### monitor.sh 로그
 
 ```bash
