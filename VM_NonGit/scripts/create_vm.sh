@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VM_NAME=${VM_NAME:-ubuntu-intel}
+VM_NAME=${VM_NAME:-ubuntu}
 IMAGE=${IMAGE:-ubuntu:noble}
-ARCH=${ARCH:-amd64}
+ARCH=${ARCH:-arm64}
 
 SSH_PORT=${SSH_PORT:-20022}
 AGENT_PORT=${AGENT_PORT:-15034}
