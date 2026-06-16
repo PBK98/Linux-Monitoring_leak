@@ -164,17 +164,14 @@ echo "[INFO] Copying files by scp..."
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app-leak" \
   agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app-leak"
 
-scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/app/agent-app-leak" \
-  agent-admin@"$VM_IP":"$AGENT_HOME/app/agent-app-leak"
-
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/monitor.sh" \
   agent-admin@"$VM_IP":"$AGENT_HOME/bin/monitor.sh"
 
-scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/report.sh" \
-  agent-admin@"$VM_IP":"$AGENT_HOME/bin/report.sh"
+# scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/report.sh" \
+#   agent-admin@"$VM_IP":"$AGENT_HOME/bin/report.sh"
 
-scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/log_archive.sh" \
-  agent-admin@"$VM_IP":"$AGENT_HOME/bin/log_archive.sh"
+# scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/log_archive.sh" \
+#   agent-admin@"$VM_IP":"$AGENT_HOME/bin/log_archive.sh"
 
 scp -P "$SSH_PORT" "$HOST_PROJECT_DIR/scripts/setup_agent-admin.sh" \
   agent-admin@"$VM_IP":"$AGENT_HOME/bin/setup_agent-admin.sh"
