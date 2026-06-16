@@ -66,13 +66,13 @@ chmod 664 /tmp/agent_app.log
 # Start agent-app-leak
 # =========================
 
-if ! pgrep -f "$AGENT_HOME/app/agent-app-leak" >/dev/null 2>&1; then
+# if ! pgrep -f "$AGENT_HOME/app/agent-app-leak" >/dev/null 2>&1; then
 
-  cd "$AGENT_HOME/app"
+#   cd "$AGENT_HOME/app"
 
-  nohup ./agent-app-leak >> "$AGENT_LOG_DIR/agent_app.log" 2>&1 < /dev/null &
+#   nohup ./agent-app-leak >> "$AGENT_LOG_DIR/agent_app.log" 2>&1 < /dev/null &
 
-fi
+# fi
 
 # =========================
 # Setup Complete
