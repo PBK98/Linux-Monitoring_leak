@@ -26,7 +26,17 @@ fi
 echo
 echo "[RESOURCE MONITORING]"
 # Process resource usage
-PRO_CPU=$(ps -p "$PID" -o pcpu= | awk '{print $1}')
+# ps pcpu is based on CPU time and can exceed 100 on multi-core systems.
+# PRO_CPU is normalized to the process share of total CPU capacity.
+CPU_CORES=$(nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
+PRO_CPU_RAW=$(ps -p "$PID" -o pcpu= | awk '{print $1}')
+[[ -z "${PRO_CPU_RAW}" || "${PRO_CPU_RAW}" == "-" ]] && PRO_CPU_RAW="0.0"
+PRO_CPU=$(awk "BEGIN {
+  if ($CPU_CORES > 0)
+    printf \"%.2f\", ($PRO_CPU_RAW / $CPU_CORES)
+  else
+    printf \"%.2f\", $PRO_CPU_RAW
+}")
 MEM_RSS=$(ps -p "$PID" -o rss= | awk '{print $1}')
 MEM_TOTAL=$(awk '/MemTotal:/ {print $2}' /proc/meminfo)
 
@@ -73,17 +83,18 @@ SYSCPU=$(awk "BEGIN {
     printf \"0.00\"
 }")
 
-echo "ProcessCPU Usage : ${PRO_CPU}%"
-echo "Process MEM Usage : ${PRO_MEM}%"
-echo "Process MEM RSS   : ${MEM_RSS} KB"
-echo "SystemCPU Usage  : ${SYSCPU}%"
-echo "System MEM Usage  : ${SYS_MEM}%"
-echo "System MEM Used   : ${SYS_MEM_USED} KB"
-echo "System MEM Total  : ${SYS_MEM_TOTAL} KB"
-echo "DISK Used         : ${DISK}%"
+echo "Process CPU Share       : ${PRO_CPU}% of total CPU (${CPU_CORES} cores)"
+echo "Process CPU ps %CPU     : ${PRO_CPU_RAW}%"
+echo "Process MEM Share       : ${PRO_MEM}% of total MEM"
+echo "Process MEM RSS         : ${MEM_RSS} KB"
+echo "System CPU Usage        : ${SYSCPU}%"
+echo "System MEM Usage        : ${SYS_MEM}%"
+echo "System MEM Used         : ${SYS_MEM_USED} KB"
+echo "System MEM Total        : ${SYS_MEM_TOTAL} KB"
+echo "DISK Used               : ${DISK}%"
 
 # Process threshold warning
-awk "BEGIN{exit !(CPU > CPU_THRESHOLD)}" && echo "[WARNING] ProcessCPU threshold exceeded ($PRO_CPU}% > $CPU_THRESHOLD}%)"
+awk "BEGIN{exit !($PRO_CPU > $CPU_THRESHOLD)}" && echo "[WARNING] Process CPU share threshold exceeded (${PRO_CPU}% > ${CPU_THRESHOLD}%)"
 awk "BEGIN{exit !($PRO_MEM > $MEM_THRESHOLD)}" && echo "[WARNING] Process MEM threshold exceeded (${PRO_MEM}% > ${MEM_THRESHOLD}%)"
 
 # System threshold warning
@@ -94,17 +105,12 @@ awk "BEGIN{exit !($SYS_MEM > $SYS_MEM_THRESHOLD)}" && echo "[WARNING] System MEM
 [[ "$DISK" -gt "$DISK_THRESHOLD" ]] && echo "[WARNING] DISK threshold exceeded (${DISK}% > ${DISK_THRESHOLD}%)"
 
 mkdir -p "$(dirname "$LOG_FILE")"
-printf '[%s] PID:%s PRO_CPU:%s%% PRO_MEM:%s%% PRO_MEM_RSS:%sKB SYSCPU:%s%% SYS_MEM:%s%% SYS_MEM_USED:%sKB SYS_MEM_TOTAL:%sKB DISK_USED:%s%%\n' \
+printf '[%s] PID:%s PRO_CPU:%s%% PRO_MEM:%s%% MEM_RSS:%sKB\n' \
   "$(ts)" \
   "$PID" \
   "$PRO_CPU" \
   "$PRO_MEM" \
   "$MEM_RSS" \
-  "$SYSCPU" \
-  "$SYS_MEM" \
-  "$SYS_MEM_USED" \
-  "$SYS_MEM_TOTAL" \
-  "$DISK" \
   >> "$LOG_FILE"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
