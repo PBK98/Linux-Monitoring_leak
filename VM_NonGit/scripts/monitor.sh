@@ -26,7 +26,7 @@ fi
 echo
 echo "[RESOURCE MONITORING]"
 # Process resource usage
-PRO_CPU=$(ps -p "$PID" -o cpu= | awk '{print $1}')
+PRO_CPU=$(ps -p "$PID" -o pcpu= | awk '{print $1}')
 MEM_RSS=$(ps -p "$PID" -o rss= | awk '{print $1}')
 MEM_TOTAL=$(awk '/MemTotal:/ {print $2}' /proc/meminfo)
 
