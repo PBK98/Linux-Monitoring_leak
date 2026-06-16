@@ -33,19 +33,28 @@ export CPU_MAX_OCCUPY=50
 DeadLock 장애에서는 프로세스가 종료되지 않기 때문에 `monitor.sh`의 Health Check는 정상으로 보일 수 있다.
 
 ```bash
-====== SYSTEM MONITOR RESULT ======
-
-[HEALTH CHECK]
-Checking process 'agent-app-leak'... [OK] (PID: 8436)
-Checking port 15034... [OK]
+>>> Starting Agent Boot Sequence...
+[1/6] Checking User Account               [OK]
+   ... Running as service user 'agent-admin' (uid=1000)
+[2/6] Verifying Environment Variables     [OK]
+   ... All required Envs correct
+[3/6] Checking Required Files             [OK]
+   ... Verified 'secret.key' with correct key string.
+[4/6] Checking Port Availability          [OK]
+   ... Port 15034 is available.
+[5/6] Verifying Log Permission            [OK]
+   ... Log directory is writable: /var/log/agent-app-leak
+[6/6] Verifying Mission Environment       [OK]
+   ... MEMORY_LIMIT=512MB, CPU_MAX_OCCUPY=50%, MULTI_THREAD_ENABLE=True
+------------------------------------------------------------
 ```
 
 하지만 요청 처리는 멈춰 있고, CPU와 메모리 지표는 OOM 또는 CPU 포화 장애처럼 급격히 증가하지 않을 수 있다.
 
 ```bash
-[2026-06-02 20:03:11] PID:8436 PRO_CPU:0.3% PRO_MEM:0.702% PRO_MEM_RSS:86288KB SYSCPU:0.41% SYS_MEM:7.18% SYS_MEM_USED:882324KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
-[2026-06-02 20:03:14] PID:8436 PRO_CPU:0.2% PRO_MEM:0.702% PRO_MEM_RSS:86300KB SYSCPU:0.36% SYS_MEM:7.18% SYS_MEM_USED:882420KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
-[2026-06-02 20:03:17] PID:8436 PRO_CPU:0.2% PRO_MEM:0.702% PRO_MEM_RSS:86300KB SYSCPU:0.31% SYS_MEM:7.19% SYS_MEM_USED:883108KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-16 16:44:02] PID:4383 PRO_CPU:-% PRO_MEM:0.141% PRO_MEM_RSS:17380KB SYSCPU:0.00% SYS_MEM:4.94% SYS_MEM_USED:608044KB SYS_MEM_TOTAL:12305676KB DISK_USED:2%
+[2026-06-16 16:45:02] PID:4383 PRO_CPU:-% PRO_MEM:0.141% PRO_MEM_RSS:17380KB SYSCPU:0.00% SYS_MEM:4.93% SYS_MEM_USED:606196KB SYS_MEM_TOTAL:12305676KB DISK_USED:2%
+[2026-06-16 16:46:02] PID:4383 PRO_CPU:-% PRO_MEM:0.141% PRO_MEM_RSS:17320KB SYSCPU:0.10% SYS_MEM:4.92% SYS_MEM_USED:605380KB SYS_MEM_TOTAL:12305676KB DISK_USED:2%
 ```
 
 확인 포인트:
@@ -65,7 +74,8 @@ pgrep -f agent-app-leak
 결과:
 
 ```text
-8436
+4382
+4383
 ```
 
 ```bash
@@ -75,7 +85,7 @@ ss -tulnp | grep 15034
 결과:
 
 ```bash
-tcp   LISTEN 0      1                   0.0.0.0:15034      0.0.0.0:*    users:(("agent-app-leak",pid=8436,fd=6))
+tcp   LISTEN 0      1                   0.0.0.0:15034      0.0.0.0:*    users:(("agent-app-leak",pid=4383,fd=4))
 ```
 
 프로세스와 포트는 정상으로 보이지만 서비스 응답은 멈춰 있다.
@@ -89,9 +99,11 @@ ps -eLf | grep agent-app-leak
 예상 결과:
 
 ```bash
-agent-admin 8436 8436  0  5 20:03 ? 00:00:00 ./agent-app-leak
-agent-admin 8436 8441  0  5 20:03 ? 00:00:00 ./agent-app-leak
-agent-admin 8436 8442  0  5 20:03 ? 00:00:00 ./agent-app-leak
+agent-a+    4382    4207    4382  0    1 16:43 pts/1    00:00:00 ./agent-app-leak
+agent-a+    4383    4382    4383  0    3 16:43 pts/1    00:00:00 ./agent-app-leak
+agent-a+    4383    4382    4384  0    3 16:43 pts/1    00:00:00 ./agent-app-leak
+agent-a+    4383    4382    4385  0    3 16:43 pts/1    00:00:00 ./agent-app-leak
+agent-a+    4556    4433    4556  0    1 16:47 pts/2    00:00:00 grep --color=auto agent-app-leak
 ```
 
 스레드는 존재하지만 요청 처리 로그가 더 이상 증가하지 않는다면 내부 락 대기 가능성이 높다.
@@ -99,22 +111,23 @@ agent-admin 8436 8442  0  5 20:03 ? 00:00:00 ./agent-app-leak
 ### 추가 분석 명령
 
 ```bash
-top -H -p 8436
+top -H -p 4382,4383
+
+top - 16:50:17 up  1:02,  2 users,  load average: 0.00, 0.00, 0.00
+Threads:   4 total,   0 running,   4 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :  12017.3 total,  11462.0 free,    608.7 used,    144.1 buff/cache
+MiB Swap:  13041.3 total,  13041.3 free,      0.0 used.  11408.6 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   4382 agent-a+  20   0    2800   1120    892 S   0.0   0.0   0:00.07 agent-app-leak
+   4383 agent-a+  30  10  175564  16232   7772 S   0.0   0.1   0:00.02 agent-app-leak
+   4384 agent-a+  30  10  175564  16232   7772 S   0.0   0.1   0:00.00 agent-app-leak
+   4385 agent-a+  30  10  175564  16232   7772 S   0.0   0.1   0:00.00 agent-app-leak
 ```
 
 스레드별 CPU 사용률을 확인한다. DeadLock 상황에서는 스레드가 바쁘게 CPU를 사용하는 것이 아니라 대기 상태에 머무를 수 있다.
 
-```bash
-strace -f -p 8436
-```
-
-`futex` 대기가 반복적으로 보이면 사용자 공간 락 또는 mutex 대기를 의심할 수 있다.
-
-```text
-futex(0x..., FUTEX_WAIT_PRIVATE, ...)
-```
-
-`futex`는 pthread mutex, Python Lock 등 사용자 공간 동기화 객체가 커널에 대기를 요청할 때 자주 관찰된다.
 
 ---
 
