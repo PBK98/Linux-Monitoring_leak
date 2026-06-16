@@ -41,6 +41,42 @@ export SYS_CPU_THRESHOLD=80
 
 ## 2. Evidence & Logs (증거 자료)
 
+### 실행 로그
+```bash
+   ... Log directory is writable: /var/log/agent-app-leak
+[6/6] Verifying Mission Environment       [OK]
+   ... MEMORY_LIMIT=512MB, CPU_MAX_OCCUPY=80%, MULTI_THREAD_ENABLE=True
+------------------------------------------------------------
+All Boot Checks Passed!
+Agent READY
+2026-06-16 19:14:59,295 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-06-16 19:14:59,295 [INFO] Agent listening at port 15034
+
+==================================================
+ [ Agent Initiate ] Resource Check
+==================================================
+ [ MEMORY ] Limit: 512MB 		[ OK ]
+ [ CPU    ] Limit: 80%  		[ WARNING: Recommend Under 50% ]
+ [ THREAD ] Concurrency: True 		[ WARNING ]
+--------------------------------------------------
+ >>> SYSTEM WARNING: POTENTIAL DEADLOCK IN CONCURRENT MODE.
+==================================================
+
+2026-06-16 19:15:01,310 [INFO] [CpuWorker] Started. Maximum CPU Limit: 80%
+2026-06-16 19:15:01,311 [INFO] [CpuWorker] Current Load: 5.00%
+2026-06-16 19:15:04,441 [INFO] [CpuWorker] Current Load: 12.57%
+2026-06-16 19:15:07,573 [INFO] [CpuWorker] Current Load: 20.93%
+2026-06-16 19:15:10,703 [INFO] [CpuWorker] Current Load: 30.45%
+2026-06-16 19:15:13,828 [INFO] [CpuWorker] Current Load: 32.55%
+2026-06-16 19:15:16,960 [INFO] [CpuWorker] Current Load: 40.98%
+2026-06-16 19:15:20,083 [INFO] [CpuWorker] Current Load: 47.15%
+2026-06-16 19:15:23,212 [INFO] [CpuWorker] Current Load: 55.53%
+2026-06-16 19:15:23,318 [CRITICAL] [CpuWorker] CPU Threshold Violated! (55.53%).
+
+>>> [SYSTEM] WATCHDOG: INITIATING EMERGENCY ABORT (SIGTERM) <<<
+
+Terminated
+```
 ### monitor.sh 로그
 
 `monitor.sh`는 프로세스 CPU 사용률, 시스템 CPU 사용률, 메모리 사용량, 디스크 사용량을 주기적으로 수집한다.
