@@ -28,12 +28,13 @@ export MEMORY_LIMIT=256
 
 ### monitor.sh 로그
 
-```text
-[2026-06-02 14:10:03] PID:4770 PRO_CPU:2.13% PRO_MEM:15.22% PRO_MEM_RSS:1872540KB SYSCPU:3.22% SYS_MEM:21.43%
-
-[2026-06-02 14:15:03] PID:4770 PRO_CPU:2.15% PRO_MEM:28.45% PRO_MEM_RSS:3498712KB SYSCPU:3.35% SYS_MEM:34.67%
-
-[2026-06-02 14:20:03] PID:4770 PRO_CPU:2.19% PRO_MEM:42.88% PRO_MEM_RSS:5278300KB SYSCPU:3.41% SYS_MEM:48.92%
+```bash
+[2026-06-02 18:51:36] PID:5518 PRO_CPU:-% PRO_MEM:1.287% PRO_MEM_RSS:158228KB SYSCPU:0.39% SYS_MEM:7.03% SYS_MEM_USED:863908KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-02 18:51:39] PID:5518 PRO_CPU:-% PRO_MEM:1.495% PRO_MEM_RSS:183832KB SYSCPU:0.30% SYS_MEM:7.48% SYS_MEM_USED:919552KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-02 18:51:42] PID:5518 PRO_CPU:-% PRO_MEM:1.704% PRO_MEM_RSS:209436KB SYSCPU:0.20% SYS_MEM:7.34% SYS_MEM_USED:901852KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-02 18:51:44] PID:5518 PRO_CPU:-% PRO_MEM:1.912% PRO_MEM_RSS:235040KB SYSCPU:0.20% SYS_MEM:7.65% SYS_MEM_USED:940436KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-02 18:51:48] PID:5518 PRO_CPU:-% PRO_MEM:2.120% PRO_MEM_RSS:260644KB SYSCPU:0.29% SYS_MEM:8.07% SYS_MEM_USED:992464KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
+[2026-06-02 18:51:49] PID:5518 PRO_CPU:-% PRO_MEM:2.328% PRO_MEM_RSS:286248KB SYSCPU:0.20% SYS_MEM:8.43% SYS_MEM_USED:1036356KB SYS_MEM_TOTAL:12293676KB DISK_USED:2%
 ```
 
 프로세스 RSS(Resident Set Size)가 지속적으로 증가하는 것을 확인하였다.
@@ -41,14 +42,38 @@ export MEMORY_LIMIT=256
 ### 프로세스 상태 확인
 
 ```bash
-ps -p 4770 -o pid,%mem,rss
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
 ```
 
 결과:
 
-```text
-PID   %MEM      RSS
-4770  42.88  5278300
+```bash
+    PID %MEM   RSS
+   6164  0.6 81612
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  0.8 107216
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  1.0 132820
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  1.2 158424
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  1.4 184028
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  1.7 209632
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  1.9 235236
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  2.1 260840
+agent-admin@ubuntu-intel:~/agent-app-leak/bin$ ps -p 6164 -o pid,%mem,rss
+    PID %MEM   RSS
+   6164  2.3 286444
 ```
 
 ### 장애 발생 이후 프로세스 확인
@@ -78,22 +103,6 @@ ss -tulnp | grep 15034
 ```
 
 서비스 포트 비활성화 확인.
-
-### 시스템 로그 확인
-
-```bash
-dmesg | grep -i oom
-```
-
-또는
-
-```bash
-journalctl -k | grep -i oom
-```
-
-OOM Killer 동작 로그 확인 가능.
-
----
 
 ## 3. Root Cause Analysis (원인 분석)
 
@@ -140,14 +149,14 @@ export MEMORY_LIMIT=256
 #### After
 
 ```bash
-export MEMORY_LIMIT=2048
+export MEMORY_LIMIT=512
 ```
 
 ### Before & After 비교
 
 | 항목           | Before | After  |
 | ------------ | ------ | ------ |
-| MEMORY_LIMIT | 256MB  | 2048MB |
+| MEMORY_LIMIT | 256MB  | 512MB |
 | 서비스 유지 시간    | 짧음     | 증가     |
 | OOM 발생       | 발생     | 미발생    |
 | 프로세스 종료      | 발생     | 미발생    |
@@ -166,7 +175,8 @@ pgrep -f agent-app-leak
 결과:
 
 ```text
-5231
+7579
+7580
 ```
 
 프로세스 정상 동작 확인.
@@ -178,15 +188,7 @@ ss -tulnp | grep 15034
 결과:
 
 ```text
-LISTEN 0 128 0.0.0.0:15034
+tcp   LISTEN 0      1                   0.0.0.0:15034      0.0.0.0:*    users:(("agent-app-leak",pid=7580,fd=6))
 ```
 
 포트 정상 상태 확인.
-
-### 추가 개선 방안
-
-* Memory Leak 원인 코드 수정
-* 메모리 사용량 임계치 경고 기능 추가
-* OOM Killer 로그 자동 수집 기능 구현
-* 일정 임계치 초과 시 프로세스 자동 재시작 기능 추가
-* 모니터링 시스템을 통한 사전 알림 기능 적용
